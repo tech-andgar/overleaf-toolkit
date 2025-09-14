@@ -25,8 +25,8 @@ function read_image_version() {
 }
 
 function read_mongo_version() {
-  local mongo_image=$(read_configuration "MONGO_IMAGE")
-  local mongo_version=$(read_configuration "MONGO_VERSION")
+  local mongo_image=mongo
+  local mongo_version=6.0
   if [ -z "${mongo_version}" ]; then
     if [[ "$mongo_image" =~ ^mongo:([0-9]+)\.(.*)$ ]]; then
       # when running a chain of commands (example: bin/up -> bin/docker-compose) we're passing
