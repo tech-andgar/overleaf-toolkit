@@ -75,15 +75,43 @@ function read_mongo_version() {
   fi
 }
 
+function get_arch() {
+  ARCH=$(uname -m)
+  case $ARCH in
+    aarch64)
+      echo "arm64"
+      ;;
+    arm64)
+      echo "arm64"
+      ;;
+    x86_64)
+      echo "amd64"
+      ;;
+    *)
+      echo "unsupported"
+      ;;
+  esac
+}
+
 function set_server_pro_image_name() {
   local version=$1
   local image_name
+  local arch
+
+  arch=$(get_arch)
+
   if [[ -n ${OVERLEAF_IMAGE_NAME:-} ]]; then
     image_name="$OVERLEAF_IMAGE_NAME"
   elif [[ $SERVER_PRO == "true" ]]; then
     image_name="quay.io/sharelatex/sharelatex-pro"
   else
-    image_name="sharelatex/sharelatex"
+    if [[ "$arch" == "arm64" ]]; then
+      # Use a community-maintained ARM64 image
+      image_name="lcpu-club/sharelatex"
+      version="latest-arm64"
+    else
+      image_name="sharelatex/sharelatex"
+    fi
   fi
   export IMAGE="$image_name:$version"
 }
