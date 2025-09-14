@@ -107,8 +107,8 @@ function set_server_pro_image_name() {
   else
     if [[ "$arch" == "arm64" ]]; then
       # Use a community-maintained ARM64 image
-      image_name="lcpu-club/sharelatex"
-      version="latest-arm64"
+      image_name="shantanupatil01/overleaf-arm64"
+      version="latest"
     else
       image_name="sharelatex/sharelatex"
     fi
