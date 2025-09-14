@@ -8,6 +8,8 @@ ESSENTIAL_PACKAGES=(
     "fontawesome5"
 )
 
+PACKAGES_INSTALLED=false # Flag to track if any package was installed
+
 echo "Updating tlmgr..."
 docker exec sharelatex tlmgr update --self
 
@@ -20,22 +22,32 @@ echo "Sharelatex container is ready."
 
 echo "Installing essential packages..."
 for package in "${ESSENTIAL_PACKAGES[@]}"; do
-    echo "Installing ${package}..."
-    docker exec sharelatex tlmgr install "${package}" || true
+    echo "Checking if ${package} is installed..."
+    if docker exec sharelatex tlmgr info "${package}" > /dev/null 2>&1; then
+        echo "${package} is already installed. Skipping."
+    else
+        echo "${package} is not installed. Installing..."
+        docker exec sharelatex tlmgr install "${package}"
+        PACKAGES_INSTALLED=true # Set flag to true if a package is installed
+    fi
 done
 
-docker exec sharelatex tlmgr path add
+if [ "$PACKAGES_INSTALLED" = true ]; then
+    docker exec sharelatex tlmgr path add
 
-CURRENT_VERSION=$(cat config/version)
-NEW_VERSION="${CURRENT_VERSION}-with-essential-packages"
+    CURRENT_VERSION=$(cat config/version)
+    NEW_VERSION="${CURRENT_VERSION}-with-essential-packages"
 
-echo "Committing changes to new image with tag '${NEW_VERSION}'..."
-docker commit sharelatex "sharelatex/sharelatex:${NEW_VERSION}"
+    echo "Committing changes to new image with tag '${NEW_VERSION}'..."
+    docker commit sharelatex "sharelatex/sharelatex:${NEW_VERSION}"
 
-echo "Updating config/version to '${NEW_VERSION}'..."
-echo "${NEW_VERSION}" > config/version
+    echo "Updating config/version to '${NEW_VERSION}'..."
+    echo "${NEW_VERSION}" > config/version
 
-echo "Restarting Overleaf..."
-./bin/up
+    echo "Restarting Overleaf..."
+    ./bin/up -d
+else
+    echo "No new packages were installed. Skipping image commit and Overleaf restart."
+fi
 
 echo "Done!"
