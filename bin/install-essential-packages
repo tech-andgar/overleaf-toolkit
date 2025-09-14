@@ -11,10 +11,17 @@ ESSENTIAL_PACKAGES=(
 echo "Updating tlmgr..."
 docker exec sharelatex tlmgr update --self
 
+echo "Waiting for sharelatex container to be ready..."
+while ! docker exec sharelatex /bin/true > /dev/null 2>&1; do
+    echo "Sharelatex container not ready yet, waiting..."
+    sleep 5
+done
+echo "Sharelatex container is ready."
+
 echo "Installing essential packages..."
 for package in "${ESSENTIAL_PACKAGES[@]}"; do
     echo "Installing ${package}..."
-    docker exec sharelatex tlmgr install "${package}"
+    docker exec sharelatex tlmgr install "${package}" || true
 done
 
 docker exec sharelatex tlmgr path add
