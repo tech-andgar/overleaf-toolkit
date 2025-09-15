@@ -16,6 +16,19 @@ git clone https://github.com/overleaf/toolkit.git ./overleaf-toolkit
 
 Then follow the [Quick Start Guide](./doc/quick-start-guide.md).
 
+## TeX Live Package Management for Developers
+
+When using minimal Overleaf Docker images, you might encounter "LaTeX Error: File '<package>.sty' not found." This indicates a missing TeX Live package. This toolkit automatically detects your CPU architecture (ARM or x86_64) and uses an appropriate Docker image.
+
+We provide scripts to simplify package management:
+
+-   **Install Essential Packages:** Use `./bin/install-essential-packages` to install a predefined set of common LaTeX packages. This script intelligently checks if packages are already installed and accessible to LaTeX before attempting installation.
+-   **Install Individual Packages:** Use `./bin/add-tex-package <package-name>` to install a specific LaTeX package.
+
+For a complete guide on TeX Live package management, including manual installation steps and troubleshooting, refer to [Custom TeX Live Packages](./doc/custom-texlive-packages.md).
+
+To reset your project to a clean state (removing containers, images, data, and config files), use `./bin/reset-project`.
+
 
 ## Documentation
 

@@ -27,7 +27,7 @@ The script will automatically:
 
 ### Install a Set of Essential Packages
 
-If you frequently need the same set of packages, you can use the `install-essential-packages` script. This script installs a predefined list of packages (`titlesec`, `enumitem`, `fontawesome5`).
+If you frequently need the same set of packages, you can use the `install-essential-packages` script. This script installs a predefined list of packages (`titlesec`, `enumitem`, `fontawesome5`). It first checks if each package is already installed and accessible to LaTeX using `kpsewhich` before attempting installation.
 
 To use the script, run the following command:
 ```bash
