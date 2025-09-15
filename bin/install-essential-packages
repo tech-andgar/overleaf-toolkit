@@ -22,12 +22,12 @@ echo "Sharelatex container is ready."
 
 echo "Installing essential packages..."
 for package in "${ESSENTIAL_PACKAGES[@]}"; do
-    echo "Checking if ${package} is installed..."
-    if docker exec sharelatex tlmgr info "${package}" > /dev/null 2>&1; then
-        echo "${package} is already installed. Skipping."
+    echo "Checking if ${package} is installed and accessible to LaTeX..."
+    if docker exec sharelatex kpsewhich "${package}.sty" > /dev/null 2>&1; then
+        echo "${package} is already installed and accessible. Skipping."
     else
-        echo "${package} is not installed. Installing..."
-        docker exec sharelatex tlmgr install "${package}"
+        echo "${package} is not installed or not accessible. Installing..."
+        docker exec sharelatex tlmgr install "${package}" || true
         PACKAGES_INSTALLED=true # Set flag to true if a package is installed
     fi
 done
