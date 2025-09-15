@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "--- Starting full project reset ---"
+
+echo "1. Stopping and removing all containers and images for the current project..."
+./bin/docker-compose down --rmi all
+
+echo "2. Removing all project data directories..."
+rm -rf data/git-bridge data/mongo data/overleaf data/redis
+
+echo "3. Removing all project configuration files..."
+rm config/overleaf.rc config/variables.env config/version
+
+echo "4. Initializing new configuration..."
+./bin/init
+
+echo "--- Full project reset complete ---"
+echo "You can now run './bin/up -d' to start the project, or './bin/install-essential-packages' to install common LaTeX packages."

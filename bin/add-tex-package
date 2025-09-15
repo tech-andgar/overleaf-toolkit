@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <package-name>"
+    exit 1
+fi
+
+PACKAGE_NAME=$1
+CURRENT_VERSION=$(cat config/version)
+NEW_VERSION="${CURRENT_VERSION}-with-${PACKAGE_NAME}"
+
+echo "Installing package '${PACKAGE_NAME}'..."
+docker exec sharelatex tlmgr install "${PACKAGE_NAME}"
+docker exec sharelatex tlmgr path add
+
+echo "Committing changes to new image with tag '${NEW_VERSION}'..."
+docker commit sharelatex "sharelatex/sharelatex:${NEW_VERSION}"
+
+echo "Updating config/version to '${NEW_VERSION}'..."
+echo "${NEW_VERSION}" > config/version
+
+echo "Restarting Overleaf..."
+./bin/up
+
+echo "Done!"

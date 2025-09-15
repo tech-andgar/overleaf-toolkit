@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "Stopping and removing all containers for the current project..."
+./bin/docker-compose down
+
+echo "Done!"

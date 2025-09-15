@@ -15,7 +15,7 @@ function read_config() {
 
 function read_image_version() {
   IMAGE_VERSION="$(head -n 1 "$TOOLKIT_ROOT/config/version")"
-  if [[ ! "$IMAGE_VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9])+(-RC[0-9]*)?(-with-texlive-full)?$ ]]; then
+  if [[ ! "$IMAGE_VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9])+(-[a-zA-Z0-9-]+)?$ ]]; then
     echo "ERROR: invalid version '${IMAGE_VERSION}'"
     exit 1
   fi
@@ -25,8 +25,8 @@ function read_image_version() {
 }
 
 function read_mongo_version() {
-  local mongo_image=$(read_configuration "MONGO_IMAGE")
-  local mongo_version=$(read_configuration "MONGO_VERSION")
+  local mongo_image=mongo
+  local mongo_version=6.0
   if [ -z "${mongo_version}" ]; then
     if [[ "$mongo_image" =~ ^mongo:([0-9]+)\.(.*)$ ]]; then
       # when running a chain of commands (example: bin/up -> bin/docker-compose) we're passing
@@ -75,15 +75,43 @@ function read_mongo_version() {
   fi
 }
 
+function get_arch() {
+  ARCH=$(uname -m)
+  case $ARCH in
+    aarch64)
+      echo "arm64"
+      ;;
+    arm64)
+      echo "arm64"
+      ;;
+    x86_64)
+      echo "amd64"
+      ;;
+    *)
+      echo "unsupported"
+      ;;
+  esac
+}
+
 function set_server_pro_image_name() {
   local version=$1
   local image_name
+  local arch
+
+  arch=$(get_arch)
+
   if [[ -n ${OVERLEAF_IMAGE_NAME:-} ]]; then
     image_name="$OVERLEAF_IMAGE_NAME"
   elif [[ $SERVER_PRO == "true" ]]; then
     image_name="quay.io/sharelatex/sharelatex-pro"
   else
-    image_name="sharelatex/sharelatex"
+    if [[ "$arch" == "arm64" ]]; then
+      # Use a community-maintained ARM64 image
+      image_name="pingwin02/sharelatex-arm"
+      version="slim"
+    else
+      image_name="sharelatex/sharelatex"
+    fi
   fi
   export IMAGE="$image_name:$version"
 }
